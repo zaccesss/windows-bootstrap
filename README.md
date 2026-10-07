@@ -78,6 +78,16 @@ $env:BOOTSTRAP_GITHUB_USER = '<your GitHub user>'; .\bootstrap\bootstrap.ps1
 | [New PC checklist](docs/new-pc.md) | Everything to do on a new PC, including WSL2 and dual booting |
 | [Accessibility](ACCESSIBILITY.md) | How a run reads and the settings it carries over |
 
+## Other platforms
+
+| Platform | Repository |
+| --- | --- |
+| macOS | [mac-bootstrap](https://github.com/zaccesss/mac-bootstrap) |
+| Ubuntu, including WSL2 and VMs | [linux-bootstrap](https://github.com/zaccesss/linux-bootstrap) |
+| Windows 11 | [windows-bootstrap](https://github.com/zaccesss/windows-bootstrap) |
+
+All three use the same public dotfiles and config repositories.
+
 ## Development
 
 The Pester tests and the analyzer run on any machine with PowerShell 7:
