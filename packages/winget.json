@@ -1,0 +1,61 @@
+{
+  "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+  "CreationDate": "2026-10-07T00:00:00.000-00:00",
+  "Sources": [
+    {
+      "Packages": [
+        { "PackageIdentifier": "Git.Git" },
+        { "PackageIdentifier": "GitHub.cli" },
+        { "PackageIdentifier": "GitHub.GitLFS" },
+        { "PackageIdentifier": "Microsoft.PowerShell" },
+        { "PackageIdentifier": "Microsoft.WindowsTerminal" },
+        { "PackageIdentifier": "Microsoft.PowerToys" },
+        { "PackageIdentifier": "Starship.Starship" },
+        { "PackageIdentifier": "DEVCOM.JetBrainsMonoNerdFont" },
+        { "PackageIdentifier": "ajeetdsouza.zoxide" },
+        { "PackageIdentifier": "junegunn.fzf" },
+        { "PackageIdentifier": "BurntSushi.ripgrep.MSVC" },
+        { "PackageIdentifier": "Neovim.Neovim" },
+        { "PackageIdentifier": "JesseDuffield.lazygit" },
+        { "PackageIdentifier": "dandavison.delta" },
+        { "PackageIdentifier": "koalaman.shellcheck" },
+        { "PackageIdentifier": "Kitware.CMake" },
+        { "PackageIdentifier": "OpenJS.NodeJS.LTS" },
+        { "PackageIdentifier": "Python.Python.3.14" },
+        { "PackageIdentifier": "astral-sh.uv" },
+        { "PackageIdentifier": "GoLang.Go" },
+        { "PackageIdentifier": "Rustlang.Rustup" },
+        { "PackageIdentifier": "Microsoft.OpenJDK.25" },
+        { "PackageIdentifier": "Typst.Typst" },
+        { "PackageIdentifier": "AquaSecurity.Trivy" },
+        { "PackageIdentifier": "lycheeverse.lychee" },
+        { "PackageIdentifier": "Microsoft.VisualStudioCode" },
+        { "PackageIdentifier": "Anysphere.Cursor" },
+        { "PackageIdentifier": "JetBrains.Toolbox" },
+        { "PackageIdentifier": "AivarAnnamaa.Thonny" },
+        { "PackageIdentifier": "ProcessingFoundation.Processing" },
+        { "PackageIdentifier": "ArduinoSA.IDE.stable" },
+        { "PackageIdentifier": "KiCad.KiCad" },
+        { "PackageIdentifier": "AnalogDevices.LTspice" },
+        { "PackageIdentifier": "JGraph.Draw" },
+        { "PackageIdentifier": "Figma.Figma" },
+        { "PackageIdentifier": "Iterate.Cyberduck" },
+        { "PackageIdentifier": "Notion.Notion" },
+        { "PackageIdentifier": "Obsidian.Obsidian" },
+        { "PackageIdentifier": "Anki.Anki" },
+        { "PackageIdentifier": "DigitalScholar.Zotero" },
+        { "PackageIdentifier": "TheDocumentFoundation.LibreOffice" },
+        { "PackageIdentifier": "Adobe.Acrobat.Reader.64-bit" },
+        { "PackageIdentifier": "Zoom.Zoom" },
+        { "PackageIdentifier": "Telegram.TelegramDesktop" }
+      ],
+      "SourceDetails": {
+        "Argument": "https://cdn.winget.microsoft.com/cache",
+        "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+        "Name": "winget",
+        "Type": "Microsoft.PreIndexed.Package"
+      }
+    }
+  ],
+  "WinGetVersion": "1.11.0"
+}

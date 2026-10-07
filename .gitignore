@@ -1,0 +1,23 @@
+# Local environment
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bootstrap-generated state
+.bootstrap-state/

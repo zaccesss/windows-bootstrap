@@ -1,0 +1,22 @@
+# weekly dependency update PRs for the GitHub Actions used across the workflows above. Major
+# version bumps are ignored, since a breaking change should never land automatically, matching
+# the pattern used across the rest of the fleet. Merging the safe ones is handled centrally by
+# repo-ops' daily sweep, not a workflow in this repo.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major

@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an improvement to the bootstrap
+title: "feat: "
+labels: ["enhancement"]
+assignees:
+  - zaccesss
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: A short sentence explaining what this issue covers.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What problem would this change solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the proposed behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Links, related issues, edge cases to watch for.
+    validations:
+      required: false
