@@ -54,6 +54,7 @@ function Install-ConfigRepos {
     # checked on another system
     $localAppData = [Environment]::GetFolderPath('LocalApplicationData')
     $appData = [Environment]::GetFolderPath('ApplicationData')
+    Enable-DeveloperMode
     Get-Repository -Repository 'neovim-config' -Target (Join-Path $repos 'neovim-config')
     Get-Repository -Repository 'cli-tools-config' -Target (Join-Path $repos 'cli-tools-config')
     Get-Repository -Repository 'vscode-config' -Target (Join-Path $repos 'vscode-config')
@@ -66,7 +67,8 @@ function Install-ConfigRepos {
     Set-FileLink -Source (Join-Path $repos 'cli-tools-config\lazygit\config.yml') -Target (Join-Path $appData 'lazygit\config.yml')
 
     # Windows Terminal loads extra colour schemes from a fragment folder, so the High Contrast pair
-    # arrives without touching its own settings file; only the light and dark pairing does
+    # arrives without touching its own settings file; only the light and dark pairing and the window
+# theme do
     Get-Repository -Repository 'terminal-config' -Target (Join-Path $repos 'terminal-config')
     $fragment = Join-Path $localAppData 'Microsoft\Windows Terminal\Fragments\HighContrast\high-contrast.json'
     Set-FileLink -Source (Join-Path $repos 'terminal-config\windows\windows-terminal\high-contrast.json') -Target $fragment
@@ -83,8 +85,9 @@ function Install-ConfigRepos {
     }
 }
 
-# every Windows Terminal profile follows the system with the High Contrast Dark and Light schemes,
-# and bold text keeps its colour instead of switching to the softer bright row
+# every Windows Terminal profile follows the system with the High Contrast Dark and Light schemes
+# and bold text keeps its colour instead of switching to the softer bright row. The window's own
+# theme follows the system too; without that it stays dark around a light scheme
 function Set-TerminalScheme {
     param([string]$SettingsPath)
 
@@ -100,11 +103,13 @@ function Set-TerminalScheme {
     }
     $defaults = $settings.profiles.defaults
     $current = $defaults.PSObject.Properties['colorScheme']
-    if ($current -and $current.Value.dark -eq 'High Contrast Dark' -and $current.Value.light -eq 'High Contrast Light') {
+    $theme = $settings.PSObject.Properties['theme']
+    if ($current -and $current.Value.dark -eq 'High Contrast Dark' -and $current.Value.light -eq 'High Contrast Light' -and $theme -and $theme.Value -eq 'system') {
         Write-Info 'Windows Terminal already uses the High Contrast schemes'
         return
     }
-    Invoke-Step 'set Windows Terminal to the High Contrast Dark and Light schemes' {
+    Invoke-Step 'set Windows Terminal to the High Contrast Dark and Light schemes, following the system theme' {
+        $settings | Add-Member -Force -NotePropertyName theme -NotePropertyValue 'system'
         $pair = [pscustomobject]@{ dark = 'High Contrast Dark'; light = 'High Contrast Light' }
         $defaults | Add-Member -Force -NotePropertyName colorScheme -NotePropertyValue $pair
         $defaults | Add-Member -Force -NotePropertyName intenseTextStyle -NotePropertyValue 'bold'
