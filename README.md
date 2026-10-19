@@ -39,12 +39,13 @@ If PowerShell refuses to run the script, allow local scripts for your user once:
 | settings | Applies the Windows settings captured in system-defaults, writing only what differs |
 | wsl | Installs WSL2 with Ubuntu 26.04 (or 24.04) and explains the linux-bootstrap step |
 
-Leave stages out with `-Skip`, for example `-Skip wsl,vscode`.
+Leave stages out with `-Skip`, for example `-Skip wsl,vscode`. The list also works as one quoted
+string, as in `pwsh -File .\bootstrap\bootstrap.ps1 -Skip 'wsl,vscode'`.
 
 > [!TIP]
-> Turn on Developer Mode (Settings, System, For developers) before the first run. It lets the
-> configs stage link VS Code and lazygit settings instead of copying them, so later edits in the
-> repositories apply straight away.
+> The configs stage turns on Developer Mode first, which asks for administrator rights once. It
+> lets the stage link VS Code and lazygit settings instead of copying them, so later edits in the
+> repositories apply straight away. Declining the prompt only means the files are copied.
 
 ## Your own configuration
 

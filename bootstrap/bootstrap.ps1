@@ -14,7 +14,8 @@
     Print what each stage would do and change nothing. CI runs the bootstrap this way.
 
 .PARAMETER Skip
-    Stages to leave out, for example -Skip wsl,vscode.
+    Stages to leave out, for example -Skip wsl,vscode. A single comma-separated string such as
+    'wsl,vscode' works too, which is how the list arrives when the script is started with pwsh -File.
 
 .EXAMPLE
     .\bootstrap\bootstrap.ps1
@@ -24,7 +25,7 @@
 [CmdletBinding()]
 param(
     [switch]$Plan,
-    [ValidateSet('winget', 'dotfiles', 'git', 'configs', 'vscode', 'settings', 'wsl')]
+    [ArgumentCompleter({ 'winget', 'dotfiles', 'git', 'configs', 'vscode', 'settings', 'wsl' })]
     [string[]]$Skip = @()
 )
 
@@ -41,6 +42,7 @@ $script:Root = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'lib\wsl.ps1')
 
 $script:PlanMode = [bool]$Plan
+$Skip = Resolve-SkipList -Skip $Skip
 
 Assert-SupportedPlatform
 if ($script:PlanMode) { Write-Info 'Plan mode: showing what would happen, changing nothing' }

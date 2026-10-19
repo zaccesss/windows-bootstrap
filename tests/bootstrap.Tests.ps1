@@ -58,6 +58,26 @@ Describe 'Set-PointerFile' {
     }
 }
 
+Describe 'Resolve-SkipList' {
+    It 'accepts an array and a single comma-separated string alike' {
+        Resolve-SkipList -Skip @('winget', 'settings') | Should -Be @('winget', 'settings')
+        Resolve-SkipList -Skip 'winget, settings' | Should -Be @('winget', 'settings')
+    }
+
+    It 'stops on an unknown stage' {
+        { Resolve-SkipList -Skip 'winget,nope' } | Should -Throw '*nope*'
+    }
+}
+
+Describe 'New-FilteredPackageFile' {
+    It 'leaves out the given packages and keeps the rest' {
+        $path = New-FilteredPackageFile -Exclude @('Adobe.Acrobat.Reader.64-bit') -Path (Join-Path $TestDrive 'winget.json')
+        $ids = @((Get-Content -Raw $path | ConvertFrom-Json).Sources.Packages.PackageIdentifier)
+        $ids | Should -Not -Contain 'Adobe.Acrobat.Reader.64-bit'
+        $ids.Count | Should -Be ((Get-PackageIds).Count - 1)
+    }
+}
+
 Describe 'Windows Terminal schemes' {
     BeforeAll {
         . (Join-Path $script:Root 'bootstrap\lib\common.ps1')
@@ -73,11 +93,12 @@ Describe 'Windows Terminal schemes' {
         $saved.profiles.defaults.colorScheme.dark | Should -Be 'High Contrast Dark'
         $saved.profiles.defaults.colorScheme.light | Should -Be 'High Contrast Light'
         $saved.profiles.defaults.intenseTextStyle | Should -Be 'bold'
+        $saved.theme | Should -Be 'system'
     }
 
     It 'leaves a file that already uses the pair untouched' {
         $path = Join-Path $TestDrive 'done.json'
-        Set-Content $path '{ "profiles": { "defaults": { "colorScheme": { "dark": "High Contrast Dark", "light": "High Contrast Light" } } } }'
+        Set-Content $path '{ "theme": "system", "profiles": { "defaults": { "colorScheme": { "dark": "High Contrast Dark", "light": "High Contrast Light" } } } }'
         Set-TerminalScheme -SettingsPath $path 6>$null
         (Get-ChildItem $TestDrive -Filter 'done.json.backup*').Count | Should -Be 0
     }
@@ -93,5 +114,14 @@ Describe 'plan mode' {
         }
         $output | Should -Match 'Would clone dotfiles into'
         Test-Path $env:WINDOWS_BOOTSTRAP_REPOS_DIR | Should -BeFalse
+    }
+
+    It 'skips stages given as one comma-separated string' {
+        $env:WINDOWS_BOOTSTRAP_ALLOW_ANY_OS = '1'
+        $env:WINDOWS_BOOTSTRAP_REPOS_DIR = Join-Path $TestDrive 'repos'
+        $output = & (Join-Path $script:Root 'bootstrap\bootstrap.ps1') -Plan -Skip 'vscode,settings' 6>&1 | Out-String
+        $output | Should -Match 'Skipping stage: vscode'
+        $output | Should -Match 'Skipping stage: settings'
+        $output | Should -Not -Match 'Completed stage: settings'
     }
 }

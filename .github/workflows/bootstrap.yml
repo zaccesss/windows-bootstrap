@@ -1,10 +1,17 @@
 name: Bootstrap
 
+# docs-only changes skip both Windows jobs, since they change nothing either one checks
 on:
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   push:
     branches:
       - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   merge_group:
 
 permissions:

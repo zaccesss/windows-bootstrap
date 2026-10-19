@@ -92,3 +92,47 @@ function Set-PointerFile {
         Set-Content -Path $Path -Value $Content -Encoding utf8
     }
 }
+
+$script:StageNames = @('winget', 'dotfiles', 'git', 'configs', 'vscode', 'settings', 'wsl')
+
+# `pwsh -File script.ps1 -Skip winget,settings` passes the list as one string, so each value is split
+# on commas as well. An unknown name stops the run rather than being silently ignored
+function Resolve-SkipList {
+    param([string[]]$Skip)
+
+    $names = @($Skip | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim().ToLowerInvariant() } | Where-Object { $_ })
+    $unknown = @($names | Where-Object { $script:StageNames -notcontains $_ })
+    if ($unknown.Count -gt 0) {
+        throw "Unknown stage for -Skip: $($unknown -join ', '). The stages are $($script:StageNames -join ', ')"
+    }
+    return $names
+}
+
+function Test-IsAdministrator {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    return ([Security.Principal.WindowsPrincipal]$identity).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+# Developer Mode lets a normal user create symbolic links, so the configs stage can link files
+# instead of copying them. It is a machine setting, so a normal terminal asks for elevation once
+# through a UAC prompt; declining it only means the links fall back to copies
+function Enable-DeveloperMode {
+    $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
+    $current = try { (Get-ItemProperty -Path $key -Name AllowDevelopmentWithoutDevLicense -ErrorAction Stop).AllowDevelopmentWithoutDevLicense } catch { $null }
+    if ($current -eq 1) {
+        Write-Info 'Developer Mode is already on'
+        return
+    }
+    Invoke-Step 'turn on Developer Mode so config files can be linked rather than copied' {
+        $regArgs = 'add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /v AllowDevelopmentWithoutDevLicense /t REG_DWORD /d 1 /f'
+        try {
+            if (Test-IsAdministrator) {
+                Start-Process reg.exe -ArgumentList $regArgs -Wait -NoNewWindow
+            } else {
+                Start-Process reg.exe -ArgumentList $regArgs -Wait -Verb RunAs -WindowStyle Hidden
+            }
+        } catch {
+            Write-Warn 'Developer Mode was not turned on; config files will be copied instead of linked'
+        }
+    }
+}

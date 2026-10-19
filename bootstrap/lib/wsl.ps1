@@ -3,11 +3,6 @@
 
 $script:PreferredDistros = @('Ubuntu-26.04', 'Ubuntu-24.04')
 
-function Test-IsAdministrator {
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    return ([Security.Principal.WindowsPrincipal]$identity).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-}
-
 # wsl.exe prints UTF-16 text, which PowerShell reads with a NUL between letters; removing them makes
 # the distro names comparable
 function Get-WslLines {

@@ -11,7 +11,8 @@ take and changes nothing.
 `winget import` installs every package in `packages/winget.json` that is missing. Packages already
 installed keep their version; upgrades stay a deliberate `winget upgrade --all`. The list is in
 winget's own export format, so running `winget export -o packages/winget.json` on a PC that is set
-up the right way regenerates it.
+up the right way regenerates it. `Adobe.Acrobat.Reader.64-bit` is left out when Adobe Acrobat is
+already installed, since Acrobat Pro and the 64-bit Reader share one install.
 
 ### 2. Dotfiles
 
@@ -33,8 +34,9 @@ up the right way regenerates it.
 
 ### 3b. Config repositories
 
-Each tool gets the lightest pointer it supports, since Windows has no cheap file links for a
-normal user:
+The stage first turns on Developer Mode, which needs administrator rights, so a normal terminal
+shows one UAC prompt. Each tool then gets the lightest pointer it supports, since Windows has no
+cheap file links for a normal user:
 
 | Tool | How it points at the repository |
 | --- | --- |
