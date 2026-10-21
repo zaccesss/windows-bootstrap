@@ -32,9 +32,9 @@ If PowerShell refuses to run the script, allow local scripts for your user once:
 | Stage | What happens |
 | --- | --- |
 | winget | Installs anything missing from `packages/winget.json` without upgrading what is already there |
-| dotfiles | Signs in to GitHub, clones the dotfiles and points the PowerShell 7 profile and starship at them |
+| dotfiles | Signs in to GitHub, clones the dotfiles, points the PowerShell 7 profile and starship at them, puts `zt` on the `PATH` and makes Command Prompt run the dotfiles' start-up |
 | git | Copies a starting `.gitconfig` and SSH config if missing and links the Git hooks |
-| configs | Points Neovim, VS Code settings, lazygit and ripgrep at their config repositories, then gives Windows Terminal the High Contrast light and dark schemes |
+| configs | Points Neovim, VS Code settings, lazygit and ripgrep at their config repositories, then gives Windows Terminal the eight Zacess schemes with Zacess Deep Contrast Dark as the default |
 | vscode | Installs missing VS Code extensions from vscode-config at their latest version |
 | settings | Applies the Windows settings captured in system-defaults, writing only what differs |
 | wsl | Installs WSL2 with Ubuntu 26.04 (or 24.04) and explains the linux-bootstrap step |
@@ -60,7 +60,7 @@ The dotfiles and configs come from these public repositories:
 | [neovim-config](https://github.com/zaccesss/neovim-config) | Neovim with LSP, treesitter and Telescope |
 | [cli-tools-config](https://github.com/zaccesss/cli-tools-config) | ripgrep, fzf and lazygit defaults |
 | [vscode-config](https://github.com/zaccesss/vscode-config) | VS Code settings, keybindings and extensions |
-| [terminal-config](https://github.com/zaccesss/terminal-config) | The High Contrast light and dark schemes for Windows Terminal |
+| [terminal-config](https://github.com/zaccesss/terminal-config) | The eight Zacess schemes for Windows Terminal |
 | [system-defaults](https://github.com/zaccesss/system-defaults) | Windows settings, captured and applied |
 
 They are cloned into `%USERPROFILE%\.dotfiles` (change it with `BOOTSTRAP_CONFIG_DIR`). `.gitconfig`
