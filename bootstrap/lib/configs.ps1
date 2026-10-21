@@ -66,12 +66,17 @@ function Install-ConfigRepos {
     Set-FileLink -Source (Join-Path $repos 'vscode-config\keybindings\windows-linux.json') -Target (Join-Path $codeUser 'keybindings.json')
     Set-FileLink -Source (Join-Path $repos 'cli-tools-config\lazygit\config.yml') -Target (Join-Path $appData 'lazygit\config.yml')
 
-    # Windows Terminal loads extra colour schemes from a fragment folder, so the High Contrast pair
-    # arrives without touching its own settings file; only the light and dark pairing and the window
-# theme do
+    # Windows Terminal loads extra colour schemes from a fragment folder, so the eight Zacess schemes
+    # arrive without touching its own settings file; only the default scheme is set there
     Get-Repository -Repository 'terminal-config' -Target (Join-Path $repos 'terminal-config')
-    $fragment = Join-Path $localAppData 'Microsoft\Windows Terminal\Fragments\HighContrast\high-contrast.json'
-    Set-FileLink -Source (Join-Path $repos 'terminal-config\windows\windows-terminal\high-contrast.json') -Target $fragment
+    $fragments = Join-Path $localAppData 'Microsoft\Windows Terminal\Fragments'
+    # the earlier High Contrast fragment points at a file terminal-config no longer has, which
+    # Windows Terminal reports as an error, so its link goes
+    $oldFragment = Join-Path $fragments 'HighContrast\high-contrast.json'
+    if ((Test-Path $oldFragment) -or (Get-Item $oldFragment -ErrorAction SilentlyContinue)) {
+        Invoke-Step "remove the earlier High Contrast fragment $oldFragment" { Remove-Item -Force $oldFragment }
+    }
+    Set-FileLink -Source (Join-Path $repos 'terminal-config\windows\windows-terminal\zacess.json') -Target (Join-Path $fragments 'Zacess\zacess.json')
     Set-TerminalScheme -SettingsPath (Join-Path $localAppData 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json')
 
     # ripgrep reads its config from this variable, so no file needs linking at all
@@ -85,9 +90,10 @@ function Install-ConfigRepos {
     }
 }
 
-# every Windows Terminal profile follows the system with the High Contrast Dark and Light schemes
-# and bold text keeps its colour instead of switching to the softer bright row. The window's own
-# theme follows the system too; without that it stays dark around a light scheme
+# every Windows Terminal profile uses Zacess Deep Contrast Dark and bold text keeps its colour instead
+# of switching to the bright row. A Zacess scheme already chosen (one name or a dark and light pair,
+# set by zt for example) is kept. The window's own theme follows the system, so a light scheme is
+# never framed by a dark window
 function Set-TerminalScheme {
     param([string]$SettingsPath)
 
@@ -103,15 +109,18 @@ function Set-TerminalScheme {
     }
     $defaults = $settings.profiles.defaults
     $current = $defaults.PSObject.Properties['colorScheme']
+    $named = if (-not $current) { $null } elseif ($current.Value -is [string]) { $current.Value } else { $current.Value.dark }
     $theme = $settings.PSObject.Properties['theme']
-    if ($current -and $current.Value.dark -eq 'High Contrast Dark' -and $current.Value.light -eq 'High Contrast Light' -and $theme -and $theme.Value -eq 'system') {
-        Write-Info 'Windows Terminal already uses the High Contrast schemes'
+    $bold = $defaults.PSObject.Properties['intenseTextStyle']
+    if ($named -is [string] -and $named.StartsWith('Zacess ') -and $theme -and $theme.Value -eq 'system' -and $bold -and $bold.Value -eq 'bold') {
+        Write-Info 'Windows Terminal already uses a Zacess scheme'
         return
     }
-    Invoke-Step 'set Windows Terminal to the High Contrast Dark and Light schemes, following the system theme' {
+    Invoke-Step 'set Windows Terminal to the Zacess Deep Contrast Dark scheme' {
         $settings | Add-Member -Force -NotePropertyName theme -NotePropertyValue 'system'
-        $pair = [pscustomobject]@{ dark = 'High Contrast Dark'; light = 'High Contrast Light' }
-        $defaults | Add-Member -Force -NotePropertyName colorScheme -NotePropertyValue $pair
+        if (-not ($named -is [string] -and $named.StartsWith('Zacess '))) {
+            $defaults | Add-Member -Force -NotePropertyName colorScheme -NotePropertyValue 'Zacess Deep Contrast Dark'
+        }
         $defaults | Add-Member -Force -NotePropertyName intenseTextStyle -NotePropertyValue 'bold'
         Copy-Item $SettingsPath "$SettingsPath.backup.$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $settings | ConvertTo-Json -Depth 32 | Set-Content -Path $SettingsPath -Encoding utf8

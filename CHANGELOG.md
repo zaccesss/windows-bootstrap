@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Added
+
+- The dotfiles stage puts the dotfiles' `windows\scripts` folder on the user `PATH` for `zt` and sets Command Prompt's `AutoRun` to the dotfiles' `windows\cmd\autorun.cmd`, chaining any earlier value after it and saving that value first. It also sets `VirtualTerminalLevel` so the console host shows ANSI colours.
+
+### Changed
+
+- Windows Terminal gets the eight Zacess schemes from terminal-config's `windows-terminal\zacess.json` fragment. Every profile uses Zacess Deep Contrast Dark in place of the High Contrast light and dark pair. A Zacess scheme already set is kept. The earlier High Contrast fragment link is removed.
+
 ## 2026-10-19
 
 ### Added

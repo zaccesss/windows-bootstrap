@@ -21,6 +21,14 @@ already installed, since Acrobat Pro and the 64-bit Reader share one install.
 - writes a one-line PowerShell 7 profile that dot-sources `windows\Microsoft.PowerShell_profile.ps1`
   from the dotfiles, keeping any existing profile as a dated backup
 - sets `STARSHIP_CONFIG` for the user to the dotfiles' `windows\starship.toml`
+- adds the dotfiles' `windows\scripts` folder to the user `PATH`, so `zt` (and `zt.cmd` in Command
+  Prompt) switches every editor and terminal to one Zacess theme
+- sets the `AutoRun` value under `HKCU\Software\Microsoft\Command Processor` to
+  `call "<dotfiles>\windows\cmd\autorun.cmd"`. An earlier value is saved to
+  `%USERPROFILE%\.local\state\windows-bootstrap\cmd-autorun-before.txt` and kept after it with
+  `&`, so it still runs. `VirtualTerminalLevel` under `HKCU\Console` is set to `1` so the older
+  console host shows the prompt's colours. To undo it, delete the value (or set it back to the
+  saved one) with `reg delete "HKCU\Software\Microsoft\Command Processor" /v AutoRun /f`
 
 ### 3. Git
 
