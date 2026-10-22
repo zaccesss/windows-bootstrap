@@ -161,6 +161,53 @@ Describe 'Windows Terminal schemes' {
         $saved.profiles.defaults.colorScheme | Should -Be 'Zacess Deep Contrast Dark'
         $saved.profiles.defaults.intenseTextStyle | Should -Be 'bold'
         $saved.theme | Should -Be 'system'
+        $saved.profiles.defaults.font.face | Should -Be 'GeistMono Nerd Font'
+    }
+
+    It 'skips the Geist Mono download when the font is installed; plan mode changes nothing' {
+        $fonts = Join-Path $TestDrive 'fonts'
+        $script:PlanMode = $true
+        try { Install-GeistMonoFont -FontDir $fonts -RegistryKey 'TestRegistry:\Fonts' 6>$null } finally { $script:PlanMode = $false }
+        $fonts | Should -Not -Exist
+        New-Item -ItemType Directory -Force -Path $fonts | Out-Null
+        Set-Content (Join-Path $fonts 'GeistMonoNerdFont-Regular.otf') 'x'
+        Set-Content (Join-Path $fonts 'GeistMonoNerdFontMono-Regular.otf') 'x'
+        Mock Invoke-WebRequest { throw 'no download expected' }
+        Install-GeistMonoFont -FontDir $fonts -RegistryKey 'TestRegistry:\Fonts' 6>$null
+        Should -Invoke Invoke-WebRequest -Times 0
+    }
+
+    It 'downloads Geist Mono again when only the first build is installed' {
+        $fonts = Join-Path $TestDrive 'fonts-first-build'
+        New-Item -ItemType Directory -Force -Path $fonts | Out-Null
+        Set-Content (Join-Path $fonts 'GeistMonoNerdFont-Regular.otf') 'x'
+        Mock Invoke-WebRequest { throw 'download started' }
+        { Install-GeistMonoFont -FontDir $fonts -RegistryKey 'TestRegistry:\Fonts' 6>$null } | Should -Throw 'download started'
+    }
+
+    It 'installs Geist Mono for all users from the per-user copy; plan mode changes nothing' {
+        $source = Join-Path $TestDrive 'user-fonts'
+        $machine = Join-Path $TestDrive 'machine-fonts'
+        New-Item -ItemType Directory -Force -Path $source, $machine | Out-Null
+        foreach ($name in 'GeistMonoNerdFont-Regular.otf', 'GeistMonoNerdFontMono-Regular.otf', 'GeistMonoNerdFontPropo-Regular.otf') {
+            Set-Content (Join-Path $source $name) 'x'
+        }
+        $script:PlanMode = $true
+        try { Install-GeistMonoFontAllUsers -SourceDir $source -FontDir $machine -RegistryKey 'TestRegistry:\MachineFonts' -NoElevation 6>$null } finally { $script:PlanMode = $false }
+        (Get-ChildItem $machine).Count | Should -Be 0
+        Install-GeistMonoFontAllUsers -SourceDir $source -FontDir $machine -RegistryKey 'TestRegistry:\MachineFonts' -NoElevation 6>$null
+        (Get-ChildItem $machine).Name | Should -Be @('GeistMonoNerdFont-Regular.otf', 'GeistMonoNerdFontMono-Regular.otf')
+        (Get-ItemProperty 'TestRegistry:\MachineFonts').'GeistMonoNerdFontMono-Regular (OpenType)' | Should -Be 'GeistMonoNerdFontMono-Regular.otf'
+    }
+
+    It 'skips the all-users install when both builds are already there' {
+        $machine = Join-Path $TestDrive 'machine-fonts-done'
+        New-Item -ItemType Directory -Force -Path $machine | Out-Null
+        Set-Content (Join-Path $machine 'GeistMonoNerdFont-Regular.otf') 'x'
+        Set-Content (Join-Path $machine 'GeistMonoNerdFontMono-Regular.otf') 'x'
+        Mock Copy-Item { throw 'no copy expected' }
+        Install-GeistMonoFontAllUsers -SourceDir $machine -FontDir $machine -RegistryKey 'TestRegistry:\MachineFonts2' -NoElevation 6>$null
+        Should -Invoke Copy-Item -Times 0
     }
 
     It 'replaces the earlier High Contrast pair but keeps a Zacess choice' {
@@ -173,9 +220,9 @@ Describe 'Windows Terminal schemes' {
         (Get-Content -Raw $path | ConvertFrom-Json).profiles.defaults.colorScheme | Should -Be 'Zacess Cream'
     }
 
-    It 'leaves a file that already uses a Zacess scheme untouched' {
+    It 'leaves a file that already uses a Zacess scheme and Geist Mono untouched' {
         $path = Join-Path $TestDrive 'done.json'
-        Set-Content $path '{ "theme": "system", "profiles": { "defaults": { "colorScheme": "Zacess Deep Contrast Dark", "intenseTextStyle": "bold" } } }'
+        Set-Content $path '{ "theme": "system", "profiles": { "defaults": { "colorScheme": "Zacess Deep Contrast Dark", "intenseTextStyle": "bold", "font": { "face": "GeistMono Nerd Font" } } } }'
         Set-TerminalScheme -SettingsPath $path 6>$null
         (Get-ChildItem $TestDrive -Filter 'done.json.backup*').Count | Should -Be 0
     }
