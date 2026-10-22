@@ -220,9 +220,9 @@ Describe 'Windows Terminal schemes' {
         (Get-Content -Raw $path | ConvertFrom-Json).profiles.defaults.colorScheme | Should -Be 'Zacess Cream'
     }
 
-    It 'leaves a file that already uses a Zacess scheme untouched' {
+    It 'leaves a file that already uses a Zacess scheme and Geist Mono untouched' {
         $path = Join-Path $TestDrive 'done.json'
-        Set-Content $path '{ "theme": "system", "profiles": { "defaults": { "colorScheme": "Zacess Deep Contrast Dark", "intenseTextStyle": "bold" } } }'
+        Set-Content $path '{ "theme": "system", "profiles": { "defaults": { "colorScheme": "Zacess Deep Contrast Dark", "intenseTextStyle": "bold", "font": { "face": "GeistMono Nerd Font" } } } }'
         Set-TerminalScheme -SettingsPath $path 6>$null
         (Get-ChildItem $TestDrive -Filter 'done.json.backup*').Count | Should -Be 0
     }
