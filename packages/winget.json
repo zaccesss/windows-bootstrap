@@ -21,7 +21,7 @@
         { "PackageIdentifier": "koalaman.shellcheck" },
         { "PackageIdentifier": "Kitware.CMake" },
         { "PackageIdentifier": "OpenJS.NodeJS.LTS" },
-        { "PackageIdentifier": "Python.Python.3.14" },
+        { "PackageIdentifier": "Python.PythonInstallManager" },
         { "PackageIdentifier": "astral-sh.uv" },
         { "PackageIdentifier": "GoLang.Go" },
         { "PackageIdentifier": "Rustlang.Rustup" },
