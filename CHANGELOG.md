@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Added
+
+- The configs stage installs Geist Mono Nerd Font from the pinned Nerd Fonts v3.5.1 release after checking its SHA-256 digest, with its Mono build for the terminals inside editors. It is installed for the user and then for all users, since the JetBrains IDEs' Java runtime only lists fonts installed that way; the all-users step asks for elevation once. Windows Terminal uses it as its font face, so the prompt's Nerd Font symbols draw.
+
 ### Changed
 
 - The Bootstrap workflow runs on every pull request, with a quick Changes job deciding whether the Windows jobs need to run, so docs-only changes still report each check as skipped instead of leaving it missing. Tests (Windows), Package list (winget) and markdownlint are now required before merging.
