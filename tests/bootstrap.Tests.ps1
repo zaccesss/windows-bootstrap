@@ -103,7 +103,7 @@ Describe 'Hide-HomeDotItems' {
         . (Join-Path $script:Root 'bootstrap\lib\configs.ps1')
     }
 
-    It 'hides dot folders and files only, and plan mode changes nothing' {
+    It 'hides dot folders and files only; plan mode changes nothing' {
         $homePath = Join-Path $TestDrive 'dothome'
         New-Item -ItemType Directory -Force -Path (Join-Path $homePath '.config'), (Join-Path $homePath 'dev') | Out-Null
         Set-Content -Path (Join-Path $homePath '.gitconfig') -Value 'x'
