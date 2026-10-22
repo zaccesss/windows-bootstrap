@@ -78,6 +78,50 @@ Describe 'New-FilteredPackageFile' {
     }
 }
 
+Describe 'Get-MachineSkipList' {
+    It 'reads the ids and drops comments and blank lines' {
+        $dir = Join-Path $TestDrive 'skip'
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+        Set-Content (Join-Path $dir 'TEST-PC.txt') @('# apps this PC leaves out', 'KiCad.KiCad', '', 'Figma.Figma  # not here')
+        Get-MachineSkipList -ComputerName 'TEST-PC' -SkipDir $dir | Should -Be @('KiCad.KiCad', 'Figma.Figma')
+    }
+
+    It 'returns nothing for a PC with no list' {
+        Get-MachineSkipList -ComputerName 'NO-SUCH-PC' -SkipDir (Join-Path $TestDrive 'skip') | Should -BeNullOrEmpty
+    }
+
+    It 'only names packages that are in the package list' {
+        $ids = Get-PackageIds
+        Get-ChildItem (Join-Path $script:Root 'packages\skip') -Filter '*.txt' -ErrorAction SilentlyContinue | ForEach-Object {
+            Get-MachineSkipList -ComputerName $_.BaseName | ForEach-Object { $ids | Should -Contain $_ }
+        }
+    }
+}
+
+Describe 'Hide-HomeDotItems' {
+    BeforeAll {
+        . (Join-Path $script:Root 'bootstrap\lib\configs.ps1')
+    }
+
+    It 'hides dot folders and files only, and plan mode changes nothing' {
+        $homePath = Join-Path $TestDrive 'dothome'
+        New-Item -ItemType Directory -Force -Path (Join-Path $homePath '.config'), (Join-Path $homePath 'dev') | Out-Null
+        Set-Content -Path (Join-Path $homePath '.gitconfig') -Value 'x'
+        Set-Content -Path (Join-Path $homePath 'notes.txt') -Value 'x'
+        $isHidden = { param($Name) [bool]((Get-Item -LiteralPath (Join-Path $homePath $Name) -Force).Attributes -band [IO.FileAttributes]::Hidden) }
+
+        $script:PlanMode = $true
+        try { Hide-HomeDotItems -HomePath $homePath 6>$null } finally { $script:PlanMode = $false }
+        & $isHidden '.config' | Should -BeFalse
+
+        Hide-HomeDotItems -HomePath $homePath 6>$null
+        & $isHidden '.config' | Should -BeTrue
+        & $isHidden '.gitconfig' | Should -BeTrue
+        & $isHidden 'dev' | Should -BeFalse
+        & $isHidden 'notes.txt' | Should -BeFalse
+    }
+}
+
 Describe 'Windows Terminal schemes' {
     BeforeAll {
         . (Join-Path $script:Root 'bootstrap\lib\common.ps1')

@@ -14,6 +14,10 @@ winget's own export format, so running `winget export -o packages/winget.json` o
 up the right way regenerates it. `Adobe.Acrobat.Reader.64-bit` is left out when Adobe Acrobat is
 already installed, since Acrobat Pro and the 64-bit Reader share one install.
 
+A PC can leave apps out for good with `packages\skip\<computer name>.txt`: one winget id per line,
+with `#` starting a comment. A single run can leave more out with `-SkipPackage`. The import then
+reads a filtered copy of the list.
+
 ### 2. Dotfiles
 
 - signs in to GitHub with the CLI in the browser, if not already signed in
@@ -67,6 +71,10 @@ Clones the defaults repository and runs `windows\defaults.ps1`, which applies th
 captured from a set-up PC (taskbar, File Explorer, appearance, input, Storage Sense and
 accessibility), writing only what differs. Until a PC has been captured the file is empty and this
 changes nothing. Capture with `.\windows\defaults.ps1 -Capture` in that repository.
+
+It then sets the Hidden attribute on the dot folders and files in the home folder, such as
+`.gitconfig` and `.ssh`, so File Explorer leaves them out as macOS and Linux do. File Explorer
+never hides an item by its leading dot alone. Tools ignore the attribute.
 
 ### 5. WSL2
 

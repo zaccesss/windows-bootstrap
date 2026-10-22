@@ -17,6 +17,10 @@
     Stages to leave out, for example -Skip wsl,vscode. A single comma-separated string such as
     'wsl,vscode' works too, which is how the list arrives when the script is started with pwsh -File.
 
+.PARAMETER SkipPackage
+    winget package ids to leave out on this run, on top of the PC's own list in
+    packages\skip\<computer name>.txt. Comma-separated strings work as for -Skip.
+
 .EXAMPLE
     .\bootstrap\bootstrap.ps1
 .EXAMPLE
@@ -26,7 +30,8 @@
 param(
     [switch]$Plan,
     [ArgumentCompleter({ 'winget', 'dotfiles', 'git', 'configs', 'vscode', 'settings', 'wsl' })]
-    [string[]]$Skip = @()
+    [string[]]$Skip = @(),
+    [string[]]$SkipPackage = @()
 )
 
 Set-StrictMode -Version Latest
@@ -43,17 +48,18 @@ $script:Root = Split-Path -Parent $PSScriptRoot
 
 $script:PlanMode = [bool]$Plan
 $Skip = Resolve-SkipList -Skip $Skip
+$SkipPackage = @($SkipPackage | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 
 Assert-SupportedPlatform
 if ($script:PlanMode) { Write-Info 'Plan mode: showing what would happen, changing nothing' }
 
 $stages = [ordered]@{
-    winget   = { Install-WingetPackages }
+    winget   = { Install-WingetPackages -SkipPackage $SkipPackage }
     dotfiles = { Install-Dotfiles }
     git      = { Set-GitConfiguration }
     configs  = { Install-ConfigRepos }
     vscode   = { Install-VSCodeExtensions }
-    settings = { Set-WindowsSettings }
+    settings = { Set-WindowsSettings; Hide-HomeDotItems }
     wsl      = { Install-Wsl }
 }
 

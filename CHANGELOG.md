@@ -4,8 +4,12 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+## 0.0.1 - 2026-10-22
+
 ### Added
 
+- `-SkipPackage` leaves winget ids out of one run. `packages\skip\<computer name>.txt` leaves them out on one PC for good. Both join the Acrobat check in one filtered copy of the package list.
+- The settings stage hides the dot folders and files in the home folder in File Explorer, as macOS and Linux do.
 - The dotfiles stage puts the dotfiles' `windows\scripts` folder on the user `PATH` for `zt` and sets Command Prompt's `AutoRun` to the dotfiles' `windows\cmd\autorun.cmd`, chaining any earlier value after it and saving that value first. It also sets `VirtualTerminalLevel` so the console host shows ANSI colours.
 
 ### Changed

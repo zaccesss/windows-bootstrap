@@ -36,11 +36,16 @@ If PowerShell refuses to run the script, allow local scripts for your user once:
 | git | Copies a starting `.gitconfig` and SSH config if missing and links the Git hooks |
 | configs | Points Neovim, VS Code settings, lazygit and ripgrep at their config repositories, then gives Windows Terminal the eight Zacess schemes with Zacess Deep Contrast Dark as the default |
 | vscode | Installs missing VS Code extensions from vscode-config at their latest version |
-| settings | Applies the Windows settings captured in system-defaults, writing only what differs |
+| settings | Applies the Windows settings captured in system-defaults, writing only what differs, then hides the dot folders and files in the home folder in File Explorer, as macOS and Linux do |
 | wsl | Installs WSL2 with Ubuntu 26.04 (or 24.04) and explains the linux-bootstrap step |
 
 Leave stages out with `-Skip`, for example `-Skip wsl,vscode`. The list also works as one quoted
 string, as in `pwsh -File .\bootstrap\bootstrap.ps1 -Skip 'wsl,vscode'`.
+
+Leave apps out of the winget stage with `-SkipPackage`, for example
+`-SkipPackage OBSProject.OBSStudio`. Apps one PC never wants go in
+`packages\skip\<computer name>.txt` with one winget id per line. That PC then leaves them out on
+every run.
 
 > [!TIP]
 > The configs stage turns on Developer Mode first, which asks for administrator rights once. It

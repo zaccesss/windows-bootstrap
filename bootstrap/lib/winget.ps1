@@ -39,7 +39,22 @@ function New-FilteredPackageFile {
     return $Path
 }
 
+# the package ids one PC leaves out, from packages\skip\<computer name>.txt: one id per line, with #
+# starting a comment. A PC with no file leaves nothing out
+function Get-MachineSkipList {
+    param(
+        [string]$ComputerName = $env:COMPUTERNAME,
+        [string]$SkipDir = (Join-Path $script:Root 'packages\skip')
+    )
+
+    $file = Join-Path $SkipDir "$ComputerName.txt"
+    if (-not $ComputerName -or -not (Test-Path $file)) { return @() }
+    return @(Get-Content $file | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ })
+}
+
 function Install-WingetPackages {
+    param([string[]]$SkipPackage = @())
+
     $ids = Get-PackageIds
     Write-Info "The package list has $($ids.Count) apps and tools"
 
@@ -47,12 +62,16 @@ function Install-WingetPackages {
         throw 'winget is missing. Install "App Installer" from the Microsoft Store, then run the bootstrap again'
     }
 
-    $importFile = $script:PackageFile
+    $exclude = @(Get-MachineSkipList) + @($SkipPackage | Where-Object { $_ })
+    if ($exclude) { Write-Info "Left out on $($env:COMPUTERNAME): $($exclude -join ', ')" }
     if (Test-AcrobatInstalled) {
         Write-Info "Adobe Acrobat is already installed, so $script:AcrobatReaderId is left out"
-        if (-not $script:PlanMode) {
-            $importFile = New-FilteredPackageFile -Exclude @($script:AcrobatReaderId) -Path (Join-Path ([IO.Path]::GetTempPath()) 'windows-bootstrap-winget.json')
-        }
+        $exclude += $script:AcrobatReaderId
+    }
+
+    $importFile = $script:PackageFile
+    if ($exclude -and -not $script:PlanMode) {
+        $importFile = New-FilteredPackageFile -Exclude $exclude -Path (Join-Path ([IO.Path]::GetTempPath()) 'windows-bootstrap-winget.json')
     }
 
     # --no-upgrade leaves installed apps at their version; upgrades stay a deliberate `winget upgrade`.
