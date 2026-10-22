@@ -140,3 +140,23 @@ function Set-WindowsSettings {
     }
     & $defaultsScript
 }
+
+# File Explorer hides an item only by its Hidden attribute, never by a leading dot, so the dot
+# folders and files in the home folder are marked the way macOS and Linux treat them. Tools ignore
+# the attribute; only Get-ChildItem without -Force leaves them out
+function Hide-HomeDotItems {
+    param([string]$HomePath = $HOME)
+
+    $shown = @(Get-ChildItem -LiteralPath $HomePath -Force |
+            Where-Object { $_.Name.StartsWith('.') -and -not ($_.Attributes -band [IO.FileAttributes]::Hidden) })
+    if ($shown.Count -eq 0) {
+        Write-Info 'Every dot folder and file in the home folder is already hidden'
+        return
+    }
+    if ($script:PlanMode) {
+        Write-Info "Would hide $($shown.Count) dot items in the home folder: $($shown.Name -join ', ')"
+        return
+    }
+    foreach ($item in $shown) { $item.Attributes = $item.Attributes -bor [IO.FileAttributes]::Hidden }
+    Write-Ok "Hid $($shown.Count) dot items in the home folder"
+}
