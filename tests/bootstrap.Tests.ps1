@@ -24,6 +24,30 @@ Describe 'package list' {
             $ids | Should -Contain $id
         }
     }
+
+    It 'installs Python through the Install Manager rather than a versioned package' {
+        $ids = Get-PackageIds
+        $ids | Should -Contain 'Python.PythonInstallManager'
+        $ids | Where-Object { $_ -match '^Python\.Python\.3' } | Should -BeNullOrEmpty
+    }
+}
+
+Describe 'Install-PythonRuntime' {
+    It 'installs nothing and changes no setting in plan mode' {
+        Mock Test-Command { $false }
+        Mock Invoke-Step { }
+        $script:PlanMode = $true
+        try { Install-PythonRuntime 3>$null 6>$null } finally { $script:PlanMode = $false }
+        Should -Invoke Invoke-Step -ParameterFilter { $Description -like 'install Python*' } -Times 1
+    }
+
+    It 'skips the download when the version is already installed' {
+        Mock Test-Command { $true }
+        function pymanager { 'C:\Python\python.exe' }
+        Mock Invoke-Step { }
+        Install-PythonRuntime 3>$null 6>$null
+        Should -Invoke Invoke-Step -ParameterFilter { $Description -like 'install Python*' } -Times 0
+    }
 }
 
 Describe 'Get-WantedExtensions' {

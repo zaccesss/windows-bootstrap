@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Changed
+
+- Python comes from the Python Install Manager (`Python.PythonInstallManager`) instead of the `Python.Python.3.14` package. The winget stage installs Python 3.15 with it, pins 3.15 as the default through `PYTHON_MANAGER_DEFAULT` and puts the manager's shortcuts first on the user PATH, so `python`, `python3` and `py` all start 3.15. Each part is skipped when already done. An older python.org install stays and answers to `py -V:3.14`. The stage warns when one is still on the machine PATH, since removing it needs an administrator. It also warns while the older Python Launcher still answers to `py`.
+
 ## 0.0.1 - 2026-10-22
 
 ### Added

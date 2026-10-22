@@ -85,4 +85,47 @@ function Install-WingetPackages {
     $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
     $user = [Environment]::GetEnvironmentVariable('Path', 'User')
     if ($machine -or $user) { $env:Path = "$machine;$user" }
+
+    Install-PythonRuntime
+}
+
+# Python comes from the Python Install Manager (from the package list), so a new version is a new
+# tag here rather than a new winget package. the default is pinned so a later install never takes
+# over on its own. the manager's shortcuts go first on the user PATH so python and python3 reach
+# it ahead of any other copy there. an older python.org install stays and answers to py -V:<version>
+$script:PythonTag = '3.15'
+$script:PythonShortcuts = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Python\bin'
+
+function Install-PythonRuntime {
+    if (-not $script:PlanMode -and -not (Test-Command 'pymanager')) {
+        Write-Warn 'The Python Install Manager is not on PATH yet; open a new terminal and run the bootstrap again for Python'
+        return
+    }
+    if ((Test-Command 'pymanager') -and (pymanager list --one $script:PythonTag -f exe)) {
+        Write-Info "Python $script:PythonTag is already installed"
+    } else {
+        Invoke-Step "install Python $script:PythonTag with the Python Install Manager" { pymanager install -y $script:PythonTag }
+    }
+    if ([Environment]::GetEnvironmentVariable('PYTHON_MANAGER_DEFAULT', 'User') -ne $script:PythonTag) {
+        Invoke-Step "make Python $script:PythonTag the default" {
+            [Environment]::SetEnvironmentVariable('PYTHON_MANAGER_DEFAULT', $script:PythonTag, 'User')
+            $env:PYTHON_MANAGER_DEFAULT = $script:PythonTag
+        }
+    }
+    $userPath = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
+    if ($userPath[0] -ne $script:PythonShortcuts) {
+        Invoke-Step "put $script:PythonShortcuts first on the user PATH" {
+            $rest = $userPath | Where-Object { $_ -ne $script:PythonShortcuts }
+            [Environment]::SetEnvironmentVariable('Path', (@($script:PythonShortcuts) + $rest) -join ';', 'User')
+        }
+    }
+    # the machine PATH comes before the user's. changing it needs an administrator
+    $older = @([Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' | Where-Object { $_ -match '\\Python3\d+\\(Scripts\\?)?$' } | Select-Object -Unique)
+    if ($older) {
+        Write-Warn "An older Python on the machine PATH comes before $script:PythonTag. Remove $($older -join ' and ') from it in System Properties"
+    }
+    # a python.org installer's launcher sits in the Windows folder and answers to py ahead of the manager
+    if (Test-Path -LiteralPath (Join-Path $env:SystemRoot 'py.exe')) {
+        Write-Warn 'The older Python Launcher still answers to py. Remove it with: winget uninstall --id Python.Launcher --exact'
+    }
 }
