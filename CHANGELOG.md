@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+## 0.1.0 - 2026-11-03
+
 ### Added
 
 - The configs stage installs Geist Mono Nerd Font from the pinned Nerd Fonts v3.5.1 release after checking its SHA-256 digest, with its Mono build for the terminals inside editors. It is installed for the user and then for all users, since the JetBrains IDEs' Java runtime only lists fonts installed that way; the all-users step asks for elevation once. Windows Terminal uses it as its font face, so the prompt's Nerd Font symbols draw.
@@ -12,6 +14,7 @@ All notable changes to this project are documented here.
 
 - The Bootstrap workflow runs on every pull request, with a quick Changes job deciding whether the Windows jobs need to run, so docs-only changes still report each check as skipped instead of leaving it missing. Tests (Windows), Package list (winget) and markdownlint are now required before merging.
 - Python comes from the Python Install Manager (`Python.PythonInstallManager`) instead of the `Python.Python.3.14` package. The winget stage installs Python 3.15 with it, pins 3.15 as the default through `PYTHON_MANAGER_DEFAULT` and puts the manager's shortcuts first on the user PATH, so `python`, `python3` and `py` all start 3.15. Each part is skipped when already done. An older python.org install stays and answers to `py -V:3.14`. The stage warns when one is still on the machine PATH, since removing it needs an administrator. It also warns while the older Python Launcher still answers to `py`.
+- Routine tidy-up
 
 ## 0.0.1 - 2026-10-22
 
